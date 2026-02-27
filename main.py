@@ -3,6 +3,7 @@ import argparse
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
+from prompts import system_prompt
 
 
 def main():
@@ -19,11 +20,15 @@ def main():
     message = [types.Content(role="user", parts=[types.Part(text=args.user_prompt)])]
     client = genai.Client(api_key=api_key)
     response = client.models.generate_content(
-        model="gemini-2.5-flash", contents=message
+        model="gemini-2.5-flash",
+        contents=message,
+        config=types.GenerateContentConfig(
+            system_instruction=system_prompt, temperature=0
+        ),
     )
 
     if response.usage_metadata is None:
-        raise RuntimeError("Failed to retrieve usegae data")
+        raise RuntimeError("Failed to retrieve usage data")
     if args.verbose is True:
         print(f"User prompt: {args.user_prompt}")
         print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
